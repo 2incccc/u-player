@@ -66,9 +66,13 @@ class MusicPlayer(QMainWindow):
             for file in selected_files:
                 if self.is_supported_audio(file):
                     file_info = QFileInfo(file)
+                    print(file_info)
                     file_name = file_info.fileName()
                     file_duration = self.get_file_duration(file)
                     file_folder = file_info.dir().dirName()
+
+                    file_path = file_info.absoluteFilePath()
+                    self.play_queue.append(file_path)  # 将文件路径添加到播放队列
 
                     row_count = self.file_list.rowCount()
                     self.file_list.insertRow(row_count)
@@ -94,18 +98,30 @@ class MusicPlayer(QMainWindow):
         seconds = int(duration % 60)
         return f'{minutes:02d}:{seconds:02d}'
 
-    def add_to_queue(self, index):
+    def add_to_queue(self):
         button = self.sender()
         row = self.file_list.indexAt(button.pos()).row()
-        self.play_queue.append(row)
-        print(f'添加到队列：{row}')
+
+        file_folder_item = self.file_list.item(row, 2)
+        file_folder = file_folder_item.text()
+
+        file_name_item = self.file_list.item(row, 0)
+        file_name = file_name_item.text()
+
+        file_path = os.path.join(file_folder, file_name)
+        self.play_queue.append(file_path)
+        print(f'添加到队列：{file_path}')
+        print(self.play_queue)
+
+        if self.current_song_index == -1:
+            self.current_song_index = 0
 
     def play_selected_song(self):
         selected_rows = self.file_list.selectionModel().selectedRows()
         if selected_rows:
             selected_row = selected_rows[0].row()
-            self.current_song_index = selected_row
-            self.play_current_song()
+            file_path = self.play_queue[selected_row]  # 从播放队列中获取文件路径
+            self.play_current_song(file_path)
 
     def pause_song(self):
         self.player.pause()
@@ -114,7 +130,6 @@ class MusicPlayer(QMainWindow):
         if status == QMediaPlayer.EndOfMedia:  # 歌曲播放完毕
             self.current_song_index = -1  # 重置当前播放歌曲索引
             self.play_current_song()  # 播放下一首歌曲
-
 
     def previous_song(self):
         if self.current_song_index > 0:
@@ -127,15 +142,20 @@ class MusicPlayer(QMainWindow):
             self.play_current_song()
 
     def play_current_song(self):
-        index = self.play_queue[self.current_song_index]
+        index = self.current_song_index
+        print(index)
+        print(self.file_list.item)
         file_name_item = self.file_list.item(index, 0)
+        file_folder_item = self.file_list.item(index, 2)
         file_name = file_name_item.text()
+        file_folder = file_folder_item.text()
 
-        file_info = QFileInfo(file_name)
-        file_path = file_info.absoluteFilePath()
+        file_path = os.path.join(file_folder, file_name)
+        print(file_path)
         media_content = QMediaContent(QUrl.fromLocalFile(file_path))
         self.player.setMedia(media_content)
         self.player.play()
+
 
 
 if __name__ == '__main__':
