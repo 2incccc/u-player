@@ -214,7 +214,7 @@ font: 13pt &quot;甜有万种星河&quot;;</string>
     </font>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="music">
     <attribute name="title">
@@ -392,7 +392,8 @@ selection-background-color: darkgray;
       <string>导入文件</string>
      </property>
      <property name="icon">
-      <iconset theme="search"/>
+      <iconset theme="search">
+       <normaloff>.</normaloff>.</iconset>
      </property>
     </widget>
     <zorder>line</zorder>
