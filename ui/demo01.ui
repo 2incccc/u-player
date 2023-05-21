@@ -454,7 +454,7 @@ selection-background-color: darkgray;
       <number>24</number>
      </attribute>
     </widget>
-    <widget class="QLabel" name="label_6">
+    <widget class="QLabel" name="label_music">
      <property name="geometry">
       <rect>
        <x>60</x>
@@ -472,7 +472,7 @@ selection-background-color: darkgray;
       <string>歌曲</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_7">
+    <widget class="QLabel" name="label_singer_2">
      <property name="geometry">
       <rect>
        <x>230</x>
@@ -490,7 +490,7 @@ selection-background-color: darkgray;
       <string>歌手</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_8">
+    <widget class="QLabel" name="label_album_2">
      <property name="geometry">
       <rect>
        <x>420</x>
