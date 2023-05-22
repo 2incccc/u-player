@@ -14,7 +14,8 @@ class Ui_Form(object):
         Form.setObjectName("Form")
         Form.setEnabled(True)
         Form.resize(700, 500)
-        Form.setMaximumSize(QtCore.QSize(700, 500))
+        Form.setFixedSize(QtCore.QSize(700, 500))
+
         font = QtGui.QFont()
         font.setFamily("Microsoft YaHei UI")
         Form.setFont(font)
