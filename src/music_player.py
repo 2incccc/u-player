@@ -66,7 +66,7 @@ class MusicPlayer(QMainWindow):
 
         self.play_queue = []  # 播放队列
         self.current_song_index = -1  # 当前播放歌曲的索引
-
+# 导入文件
     def import_files(self):
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.ExistingFiles | QFileDialog.Directory)
@@ -93,19 +93,19 @@ class MusicPlayer(QMainWindow):
                     self.file_list.setCellWidget(row_count, 3, add_to_queue_button)
                 else:
                     QMessageBox.warning(self, '不支持的文件类型', f'文件类型不支持：{file}')
-
+# 检查是否为支持音频格式
     def is_supported_audio(self, file):
         supported_formats = ['.mp3', '.wav']  # 支持的音频格式列表
         file_ext = os.path.splitext(file)[1].lower()
         return file_ext in supported_formats
-
+# 获取音频时长
     def get_file_duration(self, file):
         audio = AudioSegment.from_file(file)
         duration = audio.duration_seconds
         minutes = int(duration // 60)
         seconds = int(duration % 60)
         return f'{minutes:02d}:{seconds:02d}'
-
+# 添加到播放队列，下方的代码直接注释
     def add_to_queue(self):
         button = self.sender()
         row = self.file_list.indexAt(button.pos()).row()
@@ -165,7 +165,7 @@ class MusicPlayer(QMainWindow):
         self.player.play()
 
 
-
+# 主函数
 if __name__ == '__main__':
     app = QApplication([])
     player = MusicPlayer()
