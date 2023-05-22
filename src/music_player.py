@@ -4,28 +4,42 @@ from PyQt5.QtCore import Qt, QFileInfo, QUrl
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from pydub import AudioSegment
 
+from ..src import Ui_Form
+
 class MusicPlayer(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Music Player')
         self.setGeometry(100, 100, 600, 400)
 
-        # 创建文件列表
-        self.file_list = QTableWidget(self)
-        self.file_list.setGeometry(50, 50, 500, 250)
-        self.file_list.setColumnCount(4)
-        self.file_list.setHorizontalHeaderLabels(['名称', '时长', '所在文件夹'])
-        self.file_list.setColumnWidth(3, 100)  # 设置按钮列的宽度
 
-        # 创建上一首按钮
+        ## 建立连接
+        self.previous_button.clicked.connect(self.previous_song)
+
+        self.next_button.clicked.connect(self.next_song)
+
+        self.import_button.clicked.connect(self.import_files)
+
+        self.play_button.clicked.connect(self.play_current_song)
+
+        self.pause_button.clicked.connect(self.pause_song)
+
+        # self.add_to_queue_button.clicked.connect(self.add_to_queue)
+
+        # 创建文件列表
+        # self.file_list = QTableWidget(self)
+        # self.file_list.setGeometry(50, 50, 500, 250)
+        # self.file_list.setColumnCount(4)
+        self.file_list.setHorizontalHeaderLabels(['名称', '时长', '所在文件夹'])
+
+
+        # 创建上一首按钮1
         self.previous_button = QPushButton('上一首', self)
         self.previous_button.setGeometry(50, 320, 80, 30)
-        self.previous_button.clicked.connect(self.previous_song)
 
         # 创建下一首按钮
         self.next_button = QPushButton('下一首', self)
         self.next_button.setGeometry(150, 320, 80, 30)
-        self.next_button.clicked.connect(self.next_song)
 
         # 创建音量条
         self.volume_slider = QSlider(Qt.Horizontal, self)
@@ -40,17 +54,12 @@ class MusicPlayer(QMainWindow):
         self.progress_slider.setValue(0)
 
         # 创建导入按钮
-        self.import_button = QPushButton('导入', self)
-        self.import_button.setGeometry(50, 360, 80, 30)
-        self.import_button.clicked.connect(self.import_files)
 
         self.play_button = QPushButton('播放', self)
         self.play_button.setGeometry(150, 360, 80, 30)
-        self.play_button.clicked.connect(self.play_current_song)
 
         self.pause_button = QPushButton('暂停', self)
         self.pause_button.setGeometry(250, 360, 80, 30)
-        self.pause_button.clicked.connect(self.pause_song)
 
         self.player = QMediaPlayer()
         self.player.mediaStatusChanged.connect(self.on_media_status_changed)
@@ -81,7 +90,6 @@ class MusicPlayer(QMainWindow):
                     self.file_list.setItem(row_count, 2, QTableWidgetItem(file_folder))
 
                     add_to_queue_button = QPushButton('添加到队列', self.file_list)
-                    add_to_queue_button.clicked.connect(self.add_to_queue)
                     self.file_list.setCellWidget(row_count, 3, add_to_queue_button)
                 else:
                     QMessageBox.warning(self, '不支持的文件类型', f'文件类型不支持：{file}')

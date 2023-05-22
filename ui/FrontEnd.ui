@@ -13,6 +13,12 @@
     <height>500</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>700</width>
+    <height>500</height>
+   </size>
+  </property>
   <property name="maximumSize">
    <size>
     <width>700</width>
@@ -135,18 +141,15 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="font">
      <font>
-      <family>甜有万种星河</family>
-      <pointsize>13</pointsize>
+      <family>方正粗黑宋简体</family>
+      <pointsize>10</pointsize>
       <weight>50</weight>
       <italic>false</italic>
       <bold>false</bold>
-      <stylestrategy>PreferDefault</stylestrategy>
-      <kerning>true</kerning>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">
-font: 13pt &quot;甜有万种星河&quot;;</string>
+     <string notr="true"/>
     </property>
     <property name="frameShape">
      <enum>QFrame::Box</enum>
@@ -563,7 +566,7 @@ selection-background-color: darkgray;
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>10</y>
+      <y>50</y>
       <width>81</width>
       <height>18</height>
      </rect>
@@ -635,7 +638,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="Button_next">
     <property name="geometry">
      <rect>
-      <x>340</x>
+      <x>320</x>
       <y>40</y>
       <width>32</width>
       <height>32</height>
@@ -668,7 +671,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="Button_play">
     <property name="geometry">
      <rect>
-      <x>305</x>
+      <x>285</x>
       <y>40</y>
       <width>33</width>
       <height>32</height>
@@ -703,7 +706,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="Button_loop">
     <property name="geometry">
      <rect>
-      <x>245</x>
+      <x>225</x>
       <y>50</y>
       <width>18</width>
       <height>16</height>
@@ -783,7 +786,7 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="Button_prior">
     <property name="geometry">
      <rect>
-      <x>270</x>
+      <x>250</x>
       <y>40</y>
       <width>32</width>
       <height>32</height>

@@ -16,6 +16,7 @@ class Ui_Form(object):
         Form.setObjectName("Form")
         Form.setEnabled(True)
         Form.resize(700, 500)
+        Form.setMinimumSize(QtCore.QSize(700, 500))
         Form.setMaximumSize(QtCore.QSize(700, 500))
         font = QtGui.QFont()
         font.setFamily("Microsoft YaHei UI")
@@ -48,16 +49,13 @@ class Ui_Form(object):
         self.uplayer_partner.setGeometry(QtCore.QRect(20, 30, 131, 41))
         self.uplayer_partner.setMaximumSize(QtCore.QSize(131, 41))
         font = QtGui.QFont()
-        font.setFamily("甜有万种星河")
-        font.setPointSize(13)
+        font.setFamily("方正粗黑宋简体")
+        font.setPointSize(10)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
-        font.setKerning(True)
-        font.setStyleStrategy(QtGui.QFont.PreferDefault)
         self.uplayer_partner.setFont(font)
-        self.uplayer_partner.setStyleSheet("\n"
-"font: 13pt \"甜有万种星河\";")
+        self.uplayer_partner.setStyleSheet("")
         self.uplayer_partner.setFrameShape(QtWidgets.QFrame.Box)
         self.uplayer_partner.setLineWidth(1)
         self.uplayer_partner.setTextFormat(QtCore.Qt.AutoText)
@@ -110,29 +108,17 @@ class Ui_Form(object):
         self.tableView.setObjectName("tableView")
         self.tableView.horizontalHeader().setCascadingSectionResizes(False)
         self.tableView.horizontalHeader().setMinimumSectionSize(24)
-        self.label_name = QtWidgets.QLabel(self.music)
-        self.label_name.setGeometry(QtCore.QRect(60, 50, 31, 16))
-        font = QtGui.QFont()
-        font.setFamily("微软雅黑")
-        self.label_name.setFont(font)
-        self.label_name.setObjectName("label_name")
-        self.label_singer = QtWidgets.QLabel(self.music)
-        self.label_singer.setGeometry(QtCore.QRect(230, 50, 31, 16))
-        font = QtGui.QFont()
-        font.setFamily("微软雅黑")
-        self.label_singer.setFont(font)
-        self.label_singer.setObjectName("label_singer")
-        self.label_album = QtWidgets.QLabel(self.music)
-        self.label_album.setGeometry(QtCore.QRect(420, 50, 31, 16))
-        font = QtGui.QFont()
-        font.setFamily("微软雅黑")
-        self.label_album.setFont(font)
-        self.label_album.setObjectName("label_album")
+        self.tableView.setHorizontalHeaderLabels(['名称', '时长', '所在文件夹'])
+
+
+
         self.line = QtWidgets.QFrame(self.music)
         self.line.setGeometry(QtCore.QRect(0, 31, 521, 20))
         self.line.setFrameShape(QtWidgets.QFrame.HLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line.setObjectName("line")
+
+
         self.Button_insert = QtWidgets.QPushButton(self.music)
         self.Button_insert.setGeometry(QtCore.QRect(420, 10, 91, 20))
         self.Button_insert.setMinimumSize(QtCore.QSize(91, 20))
@@ -144,6 +130,8 @@ class Ui_Form(object):
         icon = QtGui.QIcon.fromTheme("search")
         self.Button_insert.setIcon(icon)
         self.Button_insert.setObjectName("Button_insert")
+
+
         self.line.raise_()
         self.lineEdit.raise_()
         self.tableView.raise_()
@@ -151,6 +139,8 @@ class Ui_Form(object):
         self.label_singer.raise_()
         self.label_album.raise_()
         self.Button_insert.raise_()
+
+        ## 播放列表 ##TODO 
         self.tabWidget.addTab(self.music, "")
         self.play = QtWidgets.QWidget()
         self.play.setObjectName("play")
@@ -184,6 +174,9 @@ class Ui_Form(object):
         font.setFamily("微软雅黑")
         self.label_album_2.setFont(font)
         self.label_album_2.setObjectName("label_album_2")
+
+
+
         self.tabWidget.addTab(self.play, "")
         self.frame_2 = QtWidgets.QFrame(Form)
         self.frame_2.setGeometry(QtCore.QRect(170, 410, 551, 91))
@@ -204,7 +197,7 @@ class Ui_Form(object):
         self.progressBar.setTextDirection(QtWidgets.QProgressBar.BottomToTop)
         self.progressBar.setObjectName("progressBar")
         self.music_name = QtWidgets.QTextBrowser(self.frame_2)
-        self.music_name.setGeometry(QtCore.QRect(10, 10, 81, 18))
+        self.music_name.setGeometry(QtCore.QRect(10, 50, 81, 18))
         self.music_name.setMinimumSize(QtCore.QSize(0, 0))
         self.music_name.setMaximumSize(QtCore.QSize(90, 18))
         font = QtGui.QFont()
@@ -226,7 +219,7 @@ class Ui_Form(object):
         self.Button_volume.setIcon(icon)
         self.Button_volume.setObjectName("Button_volume")
         self.Button_next = QtWidgets.QPushButton(self.frame_2)
-        self.Button_next.setGeometry(QtCore.QRect(340, 40, 32, 32))
+        self.Button_next.setGeometry(QtCore.QRect(320, 40, 32, 32))
         self.Button_next.setStyleSheet("background-color: rgb(255, 255, 255);\n"
 "")
         self.Button_next.setText("")
@@ -238,7 +231,7 @@ class Ui_Form(object):
         self.Button_next.setAutoRepeat(False)
         self.Button_next.setObjectName("Button_next")
         self.Button_play = QtWidgets.QPushButton(self.frame_2)
-        self.Button_play.setGeometry(QtCore.QRect(305, 40, 33, 32))
+        self.Button_play.setGeometry(QtCore.QRect(285, 40, 33, 32))
         self.Button_play.setAutoFillBackground(False)
         self.Button_play.setStyleSheet("background-color: rgb(255, 255, 255);")
         self.Button_play.setText("")
@@ -250,7 +243,7 @@ class Ui_Form(object):
         self.Button_play.setAutoRepeat(False)
         self.Button_play.setObjectName("Button_play")
         self.Button_loop = QtWidgets.QPushButton(self.frame_2)
-        self.Button_loop.setGeometry(QtCore.QRect(245, 50, 18, 16))
+        self.Button_loop.setGeometry(QtCore.QRect(225, 50, 18, 16))
         self.Button_loop.setStyleSheet("background-color: rgb(255, 255, 255);")
         self.Button_loop.setText("")
         icon3 = QtGui.QIcon()
@@ -282,7 +275,7 @@ class Ui_Form(object):
         self.Button_like.setIcon(icon6)
         self.Button_like.setObjectName("Button_like")
         self.Button_prior = QtWidgets.QPushButton(self.frame_2)
-        self.Button_prior.setGeometry(QtCore.QRect(270, 40, 32, 32))
+        self.Button_prior.setGeometry(QtCore.QRect(250, 40, 32, 32))
         self.Button_prior.setAutoFillBackground(False)
         self.Button_prior.setStyleSheet("background-color: rgb(255, 255, 255);")
         self.Button_prior.setText("")
@@ -298,7 +291,7 @@ class Ui_Form(object):
         self.frame.raise_()
 
         self.retranslateUi(Form)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
     def retranslateUi(self, Form):
