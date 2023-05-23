@@ -2,20 +2,20 @@ from PyQt5.QtWidgets import (QWidget, QDesktopWidget,
     QMessageBox, QHBoxLayout, QVBoxLayout, QSlider, QListWidget,
     QPushButton, QLabel, QComboBox, QFileDialog, QTabWidget, QApplication)
 from PyQt5.QtGui import QIcon, QFont
-from PyQt5.QtCore import Qt, QUrl, QTimer
+from PyQt5.QtCore import Qt, QUrl, QTimer, QFileSystemWatcher
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent,QAudioFormat, QAudioOutput
 import os, time
 import configparser
 from pydub import AudioSegment
-
+from eq import eq
 import sys
 import random
 from MyQLabel import MyQLabel
 import requests
 import json
+from path_convert import format_path_string
 
 from PyQt5.QtGui import QPixmap, QPalette
-
 
 class MP3Player(QWidget):
     def __init__(self):
@@ -43,9 +43,11 @@ class MP3Player(QWidget):
         self.cur_playing_song = ''
         self.is_pause = True
         self.player = QMediaPlayer()
+
+        self.EQplayer = QMediaPlayer()
         self.is_switching = False
         self.playMode = 0
-        self.settingfilename = 'config.ini'
+        self.is_eqing = False
 
         self.textLable = MyQLabel()
         self.textLable.setText("点击体验个性化一言推送")
@@ -65,20 +67,29 @@ class MP3Player(QWidget):
         # 创建第二个Widget
         widget2 = QWidget()
         layout2 = QVBoxLayout(widget2)
-        h_layout = QHBoxLayout()
+        h_layout_slider = QHBoxLayout()
 
         # 创建均衡器滑动条和标签
         self.slider_group1,self.slider_label1 = self.create_slider_group("Slider 1:")
         self.slider_group2,self.slider_label2 = self.create_slider_group("Slider 2:")
         self.slider_group3,self.slider_label3 = self.create_slider_group("Slider 3:")
 
-        h_layout.addLayout(self.slider_group1)
-        h_layout.addLayout(self.slider_group2)
-        h_layout.addLayout(self.slider_group3)
+        h_layout_slider.addLayout(self.slider_group1)
+        h_layout_slider.addLayout(self.slider_group2)
+        h_layout_slider.addLayout(self.slider_group3)
 
-        layout2.addLayout(h_layout)
+        h_layout_btn = QHBoxLayout()
+        self.confirmBtn = QPushButton("确认修改")
+        h_layout_btn.addStretch()
+        h_layout_btn . addWidget(self.confirmBtn)
+        h_layout_btn.addStretch()
 
+        v_layout = QVBoxLayout()
+        v_layout.addLayout(h_layout_slider)
+        v_layout.addSpacing(20)
+        v_layout.addLayout(h_layout_btn)
 
+        layout2.addLayout(v_layout)
 
         # 将两个Widget添加到TabWidget中
         self.tab_widget.addTab(widget1, "音乐列表")
@@ -139,6 +150,7 @@ class MP3Player(QWidget):
         self.musicList.itemDoubleClicked.connect(self.doubleClicked)
         self.slider.sliderMoved[int].connect(lambda: self.player.setPosition(self.slider.value()))
         self.PlayModeBtn.clicked.connect(self.playModeSet)
+        self.confirmBtn.clicked.connect(self.Equalizer) 
 
         # self.format = QAudioFormat()
         # self.format.setSampleRate(44100)
@@ -155,7 +167,10 @@ class MP3Player(QWidget):
         # self.data = None
 
 
-        self.loadingSetting()
+
+        self.file_watcher = QFileSystemWatcher(self)
+        self.file_watcher.directoryChanged.connect(self.updateMusicList)
+
 
         self.initUI()
 
@@ -179,12 +194,12 @@ class MP3Player(QWidget):
     def openMusicFloder(self):
         self.cur_path = QFileDialog.getExistingDirectory(self, "选取音乐文件夹", './')
         if self.cur_path:
+            self.file_watcher.addPath(self.cur_path)
             self.showMusicList()
             self.cur_playing_song = ''
             self.startTimeLabel.setText('00:00')
             self.endTimeLabel.setText('00:00')
             self.slider.setSliderPosition(0)
-            self.updateSetting()
             self.is_pause = True
             self.playBtn.setStyleSheet("QPushButton{border-image: url(resource/image/play.png)}")
     
@@ -199,9 +214,15 @@ class MP3Player(QWidget):
         if self.songs_list:
                 self.cur_playing_song = self.songs_list[self.musicList.currentRow()][-1]
 
-    # 提示
-    def Tips(self, message):
-        QMessageBox.about(self, "提示", message)
+    def updateMusicList(self):
+        
+        existing_songs = [item[0] for item in self.songs_list]
+        new_songs = []
+        for song in os.listdir(self.cur_path):
+            if song.split('.')[-1] in self.song_formats and song not in existing_songs:
+                new_songs.append([song, os.path.join(self.cur_path, song).replace('\\', '/')])
+                self.musicList.addItem(song)
+        self.songs_list.extend(new_songs)
 
     # 设置当前播放的音乐
     def setCurPlaying(self):
@@ -241,7 +262,7 @@ class MP3Player(QWidget):
                 self.player.play()
                 print(self.cur_playing_song)
                 self.is_pause = False
-                self.playBtn.setStyleSheet("QPushButton{border-image: url(resource/image/pause.png)}")
+                self.playBtn.setStyleSheet("QPushButton{border-image: url(resource/image/暂停 (1).png)}")
         elif (not self.is_pause) and (not self.is_switching):
                 self.player.pause() # 暂停播放
                 self.is_pause = True
@@ -318,24 +339,13 @@ class MP3Player(QWidget):
                 self.slider.setValue(0)
                 self.playMusic()
                 self.is_switching = False
+        elif self.is_eqing:
+            if self.player.position() == self.player.duration():
+                self.cur_playing_song = self.songs_list[self.musicList.currentRow()][-1]
+                self.player.setMedia(QMediaContent(QUrl(self.cur_playing_song)))
+                self.is_eqing = False
 
-    # 更新配置文件
-    def updateSetting(self):
-        config = configparser.ConfigParser()
-        config.read(self.settingfilename)
-        if not os.path.isfile(self.settingfilename):
-            config.add_section('MP3Player')
-        config.set('MP3Player', 'PATH', self.cur_path)
-        config.write(open(self.settingfilename, 'w'))
 
-    # 加载配置文件
-    def loadingSetting(self):
-        config = configparser.ConfigParser()
-        config.read(self.settingfilename)
-        if not os.path.isfile(self.settingfilename):
-            return
-        self.cur_path = config.get('MP3Player', 'PATH')
-        self.showMusicList()
     
     # 播放模式设置
     def playModeSet(self):
@@ -390,6 +400,7 @@ class MP3Player(QWidget):
 
         # 滑动条与标签绑定数值
         slider.valueChanged.connect(lambda value: slider_label.setText(label_text + " " + str(value)))
+        
 
         # 将滑动条和标签添加到垂直布局
         slider_group.addLayout(slider_h_layout_1)
@@ -404,13 +415,41 @@ class MP3Player(QWidget):
         
     def yiyan(self):
         #一言
-
-
         api_url = 'https://v1.hitokoto.cn/?c=b&encode=json'
         response = requests.get(api_url)
         res = json.loads(response.text)
         a_word = res['hitokoto']+' --'+'《'+res['from']+'》'
         self.textLable.setText(a_word)
+
+    def Equalizer(self):
+        low_gain = int(self.slider_label1.text().split()[-1])
+        mid_gain = int(self.slider_label2.text().split()[-1])
+        hig_gain = int(self.slider_label3.text().split()[-1])
+
+        input_file = format_path_string(self.cur_playing_song)
+        print(input_file)
+        freq_range = [1,400]
+        gain_factor = low_gain
+        eq_output_file = eq(input_file, freq_range, gain_factor, "./resource/media")
+        
+        # self.slider.setValue(0)
+        # self.musicList.setCurrentRow(self.musicList.currentRow())
+        # self.is_switching = True
+        # self.EQplayer.setMedia(QMediaContent(QUrl(eq_output_file)))
+        # self.player.pause() # 暂停播放
+        # self.is_pause = True
+        
+        
+        
+        # self.playMusic()
+        # self.is_switching = False
+        # self.is_eqing = True
+        # # print(type(self.cur_playing_song))
+        # # print(self.cur_playing_song)
+        # # print(type(self.cur_path))
+        # # print(self.cur_path)
+
+
 
 
 
