@@ -34,7 +34,7 @@ class MusicPlayer(QMainWindow):
         self.setCentralWidget(central_widget)
 
         # 加载音乐
-        self.loadMusic('../单相思.mp3')
+        self.loadMusic('../danxiangsi.mp3')
 
         # 初始化低频增益
         self.low_gain = 1.0

@@ -105,17 +105,10 @@ class MusicPlayer(QMainWindow):
         minutes = int(duration // 60)
         seconds = int(duration % 60)
         return f'{minutes:02d}:{seconds:02d}'
-<<<<<<< HEAD:src/music_player.py
 
     # def add_to_queue(self):
     #     button = self.sender()
     #     row = self.file_list.indexAt(button.pos()).row()
-=======
-# 添加到播放队列，下方的代码直接注释
-    def add_to_queue(self):
-        button = self.sender()
-        row = self.file_list.indexAt(button.pos()).row()
->>>>>>> 47f2dd7c123e32fad9b2616e3bc12fce26233b4d:src/main.py
 
     #     file_folder_item = self.file_list.item(row, 2)
     #     file_folder = file_folder_item.text()
