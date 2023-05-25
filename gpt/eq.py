@@ -111,8 +111,3 @@ class MusicPlayer(QMainWindow):
         else:
             event.ignore()
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    player = MusicPlayer()
-    player.show()
-    sys.exit(app.exec_())

@@ -1,87 +1,89 @@
+import os, time, sys, random, requests, json
+
 from PyQt5.QtWidgets import (QWidget, QDesktopWidget,
-    QMessageBox, QHBoxLayout, QVBoxLayout, QSlider, QListWidget,
-    QPushButton, QLabel, QComboBox, QFileDialog, QTabWidget, QApplication)
+                            QMessageBox, QHBoxLayout, QVBoxLayout, QSlider, QListWidget,
+                            QPushButton, QLabel, QFileDialog, QTabWidget, QApplication, QLineEdit, QGridLayout)
 from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtCore import Qt, QUrl, QTimer, QFileSystemWatcher
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent,QAudioFormat, QAudioOutput
-import os, time
-import configparser
-from pydub import AudioSegment
-from eq import eq
-import sys
-import random
-from MyQLabel import MyQLabel
-import requests
-import json
-from path_convert import format_path_string
 
-from PyQt5.QtGui import QPixmap, QPalette
+from MyQLabel import MyQLabel
+
+from eq import eq
+from path_convert import format_path_string
+from spectrum_graph import plot_and_display_spectrogram
 
 class MP3Player(QWidget):
     def __init__(self):
+        ## 继承父类
         super().__init__()
-
         
-
         self.startTimeLabel = QLabel('00:00')
         self.endTimeLabel = QLabel('00:00')
-        font = QFont()
-        font.setFamily("微软雅黑")
-        font.setPointSize(8)
-        self.startTimeLabel.setFont(font)
-        self.endTimeLabel.setFont(font)
 
-        self.slider = QSlider(Qt.Horizontal, self)
-        self.PlayModeBtn = QPushButton(self)
-        self.playBtn = QPushButton(self)
-        self.prevBtn = QPushButton(self)
-        self.nextBtn = QPushButton(self)
-        self.openBtn = QPushButton(self)
+
         self.musicList = QListWidget()
         self.song_formats = ['mp3', 'm4a', 'flac', 'wav', 'ogg']
         self.songs_list = []
         self.cur_playing_song = ''
         self.is_pause = True
         self.player = QMediaPlayer()
-
-        self.EQplayer = QMediaPlayer()
         self.is_switching = False
         self.playMode = 0
-        self.is_eqing = False
 
+
+        ## 播放进度条
+        self.slider = QSlider(Qt.Horizontal, self)
+
+        ## 按键
+        self.PlayModeBtn = QPushButton(self)
+        self.playBtn = QPushButton(self)
+        self.prevBtn = QPushButton(self)
+        self.nextBtn = QPushButton(self)
+        self.openBtn = QPushButton(self)
+
+        ## 一言
         self.textLable = MyQLabel()
         self.textLable.setText("点击体验个性化一言推送")
         self.textLable.connect_customized_slot(self.yiyan)
         font = QFont()
         font.setFamily("方正粗黑宋简体")
-        font.setPointSize(9)
+        font.setPointSize(10)
         self.textLable.setFont(font)
         self.textLable.setAlignment(Qt.AlignCenter)
-        
 
         self.tab_widget = QTabWidget(self)
-        # 第一个Widget
+        ## 第一个Widget，音乐列表
         widget1 = QWidget()
         layout1 = QVBoxLayout(widget1)
+
+        self.musicList = QListWidget()
+        self.song_formats = ['mp3', 'm4a', 'flac', 'wav', 'ogg']
+        self.songs_list = []
+        self.cur_playing_song = ''
+
+
+
         layout1.addWidget(self.musicList)
-        # 创建第二个Widget
+
+        ## 第二个Widget，简易均衡器
         widget2 = QWidget()
         layout2 = QVBoxLayout(widget2)
         h_layout_slider = QHBoxLayout()
 
         # 创建均衡器滑动条和标签
-        self.slider_group1,self.slider_label1 = self.create_slider_group("Slider 1:")
-        self.slider_group2,self.slider_label2 = self.create_slider_group("Slider 2:")
-        self.slider_group3,self.slider_label3 = self.create_slider_group("Slider 3:")
+        self.slider_group1,self.slider_label1 = self.widget2_create_slider("低频调整(30-300Hz):")
+        self.slider_group2,self.slider_label2 = self.widget2_create_slider("中频调整(300-5000Hz):")
+        self.slider_group3,self.slider_label3 = self.widget2_create_slider("高频调整(5000-16000Hz):")
 
         h_layout_slider.addLayout(self.slider_group1)
         h_layout_slider.addLayout(self.slider_group2)
         h_layout_slider.addLayout(self.slider_group3)
 
         h_layout_btn = QHBoxLayout()
-        self.confirmBtn = QPushButton("确认修改")
+        self.eseq_confirmBtn = QPushButton("确认调整")
         h_layout_btn.addStretch()
-        h_layout_btn . addWidget(self.confirmBtn)
+        h_layout_btn . addWidget(self.eseq_confirmBtn)
         h_layout_btn.addStretch()
 
         v_layout = QVBoxLayout()
@@ -91,34 +93,46 @@ class MP3Player(QWidget):
 
         layout2.addLayout(v_layout)
 
-        # 将两个Widget添加到TabWidget中
+        ## 第三、四个Widget 两个表单，从函数中返回
+        widget3 = self.widget3_create_form()
+        widget4 = self.widget4_create_form()
+
+        # 将四个Widget添加到TabWidget中
         self.tab_widget.addTab(widget1, "音乐列表")
-        self.tab_widget.addTab(widget2, "均衡器")
+        self.tab_widget.addTab(widget2, "简易均衡器")
+        self.tab_widget.addTab(widget3, "高级均衡器")
+        self.tab_widget.addTab(widget4, "声谱图生成")
         font = QFont()
         font.setFamily("方正粗黑宋简体")
-        font.setPointSize(10)
+        font.setPointSize(12)
         self.tab_widget.setFont(font)
 
+        ## 设置按键样式
         self.playBtn.setStyleSheet("QPushButton{border-image: url(./resource/image/play.png)}")
-        self.playBtn.setFixedSize(48, 48)
+        self.playBtn.setFixedSize(60, 60)
         self.nextBtn.setStyleSheet("QPushButton{border-image: url(./resource/image/47最后一页、末页、下一首.png)}")
-        self.nextBtn.setFixedSize(48, 48)
+        self.nextBtn.setFixedSize(60, 60)
         self.prevBtn.setStyleSheet("QPushButton{border-image: url(./resource/image/46第一页、首页、上一首.png)}")
-        self.prevBtn.setFixedSize(48, 48)
+        self.prevBtn.setFixedSize(60, 60)
         self.openBtn.setStyleSheet("QPushButton{border-image: url(./resource/image/下载.png)}")
-        self.openBtn.setFixedSize(36, 36)
+        self.openBtn.setFixedSize(50, 50)
         self.PlayModeBtn.setStyleSheet("QPushButton{border-image: url(./resource/image/顺序播放.png)}")
-        self.PlayModeBtn.setFixedSize(36, 36)
-
+        self.PlayModeBtn.setFixedSize(50, 50)
+        
+        ## 计时器Timer
         self.timer = QTimer(self)
         self.timer.start(1000)
         self.timer.timeout.connect(self.playByMode)
 
+        ## 页面布局设置
+
+        ## 底部播放布局
         self.hBoxSlider = QHBoxLayout()
         self.hBoxSlider.addWidget(self.startTimeLabel)
         self.hBoxSlider.addWidget(self.slider)
         self.hBoxSlider.addWidget(self.endTimeLabel)
 
+        ## 底部按键布局
         self.hBoxButton = QHBoxLayout()
         self.hBoxButton.addWidget(self.PlayModeBtn)
         self.hBoxButton.addStretch(1)
@@ -128,21 +142,23 @@ class MP3Player(QWidget):
         self.hBoxButton.addStretch(1)
         self.hBoxButton.addWidget(self.openBtn)
 
+        ## 以上两个水平布局 垂直排列
         self.vBoxControl = QVBoxLayout()
         self.vBoxControl.addLayout(self.hBoxSlider)
         self.vBoxControl.addLayout(self.hBoxButton)
 
+        ## 最底部一言布局
         self.hBoxYiyan = QHBoxLayout()
         self.hBoxYiyan.addWidget(self.textLable)
 
-
+        ## 整个布局垂直排布
         self.vboxMain = QVBoxLayout()
         self.vboxMain.addWidget(self.tab_widget)
         self.vboxMain.addLayout(self.vBoxControl)
         self.vboxMain.addLayout(self.hBoxYiyan)
-        
         self.setLayout(self.vboxMain)
 
+        ## 信号链接机制
         self.openBtn.clicked.connect(self.openMusicFloder)
         self.playBtn.clicked.connect(self.playMusic)
         self.prevBtn.clicked.connect(self.prevMusic)
@@ -150,39 +166,23 @@ class MP3Player(QWidget):
         self.musicList.itemDoubleClicked.connect(self.doubleClicked)
         self.slider.sliderMoved[int].connect(lambda: self.player.setPosition(self.slider.value()))
         self.PlayModeBtn.clicked.connect(self.playModeSet)
-        self.confirmBtn.clicked.connect(self.Equalizer) 
+        self.eseq_confirmBtn.clicked.connect(self.easy_Equalizer)
 
-        # self.format = QAudioFormat()
-        # self.format.setSampleRate(44100)
-        # self.format.setChannelCount(2)
-        # self.format.setSampleSize(16)
-        # self.format.setCodec("audio/pcm")
-        # self.format.setByteOrder(QAudioFormat.LittleEndian)
-        # self.format.setSampleType(QAudioFormat.SignedInt)
-
-        # self.audio_output = QAudioOutput(self.format)
-        # self.audio_output.setNotifyInterval(100)  # 设置通知间隔
-
-        # self.buffer = self.audio_output.start()
-        # self.data = None
-
-
-
+        ## 监测文件夹是否变化
         self.file_watcher = QFileSystemWatcher(self)
         self.file_watcher.directoryChanged.connect(self.updateMusicList)
-
 
         self.initUI()
 
 
     # 初始化界面
     def initUI(self):
-        self.resize(600, 400)
+        self.resize(1000, 700)
         self.center()
-        self.setWindowTitle('音乐播放器')   
-        self.setWindowIcon(QIcon('resource/image/favicon.ico'))
+        self.setWindowTitle('U-Player 本地音频播放工具')   
+        self.setWindowIcon(QIcon('resource/favicon.png'))
         self.show()
-        
+
     # 窗口显示居中
     def center(self):
         qr = self.frameGeometry()
@@ -202,7 +202,7 @@ class MP3Player(QWidget):
             self.slider.setSliderPosition(0)
             self.is_pause = True
             self.playBtn.setStyleSheet("QPushButton{border-image: url(resource/image/play.png)}")
-    
+
     # 显示音乐列表
     def showMusicList(self):
         self.musicList.clear()
@@ -214,8 +214,8 @@ class MP3Player(QWidget):
         if self.songs_list:
                 self.cur_playing_song = self.songs_list[self.musicList.currentRow()][-1]
 
+    # 更新音乐列表
     def updateMusicList(self):
-        
         existing_songs = [item[0] for item in self.songs_list]
         new_songs = []
         for song in os.listdir(self.cur_path):
@@ -228,28 +228,6 @@ class MP3Player(QWidget):
     def setCurPlaying(self):
         self.cur_playing_song = self.songs_list[self.musicList.currentRow()][-1]
         self.player.setMedia(QMediaContent(QUrl(self.cur_playing_song)))
-
-        # format = QAudioFormat()
-        # format.setSampleRate(44100)
-        # format.setChannelCount(2)
-        # format.setSampleSize(16)
-        # format.setCodec("audio/pcm")
-        # format.setByteOrder(QAudioFormat.LittleEndian)
-        # format.setSampleType(QAudioFormat.SignedInt)
-        
-        # audio_output = QAudioOutput(format)
-        # audio_output.setNotifyInterval(100)  # 设置通知间隔
-        
-        # buffer = audio_output.start()
-        
-        # # 将 MP3 文件加载为 AudioSegment 对象
-        # audio = AudioSegment.from_file(self.cur_playing_song, format="mp3")
-
-        # audio = AudioSegment.from_file(self.cur_playing_song, format="mp3")  # 加载 MP3 文件为 AudioSegment 对象
-        # self.data = audio.raw_data  # 将音频数据转换为字节流  # 将数据写入缓冲区
-        # print(self.data)
-    
-
 
     # 播放/暂停播放
     def playMusic(self):
@@ -267,7 +245,7 @@ class MP3Player(QWidget):
                 self.player.pause() # 暂停播放
                 self.is_pause = True
                 self.playBtn.setStyleSheet("QPushButton{border-image: url(resource/image/play.png)}")
- 	
+
     # 上一曲
     def prevMusic(self):
         self.slider.setValue(0)
@@ -339,14 +317,8 @@ class MP3Player(QWidget):
                 self.slider.setValue(0)
                 self.playMusic()
                 self.is_switching = False
-        elif self.is_eqing:
-            if self.player.position() == self.player.duration():
-                self.cur_playing_song = self.songs_list[self.musicList.currentRow()][-1]
-                self.player.setMedia(QMediaContent(QUrl(self.cur_playing_song)))
-                self.is_eqing = False
 
 
-    
     # 播放模式设置
     def playModeSet(self):
         # 设置为单曲循环模式
@@ -372,7 +344,7 @@ class MP3Player(QWidget):
         else:
             event.ignore()
 
-    def create_slider_group(self, label_text):
+    def widget2_create_slider(self, label_text):
         # 创建垂直布局
         slider_group = QVBoxLayout()
 
@@ -385,7 +357,7 @@ class MP3Player(QWidget):
 
         slider_label = QLabel(label_text + " 0")
 
-            # 创建水平布局
+        # 创建水平布局
         slider_h_layout_1 = QHBoxLayout()
         # 添加弹性空间使滑动条和标签居中
         slider_h_layout_1.addStretch()
@@ -397,22 +369,16 @@ class MP3Player(QWidget):
         slider_h_layout_2.addWidget(slider_label)
         slider_h_layout_2.addStretch()
 
-
         # 滑动条与标签绑定数值
         slider.valueChanged.connect(lambda value: slider_label.setText(label_text + " " + str(value)))
-        
 
         # 将滑动条和标签添加到垂直布局
         slider_group.addLayout(slider_h_layout_1)
         slider_group.addLayout(slider_h_layout_2)
 
         return slider_group,slider_label
-    
-    def test_slider_label(self):
-        print(self.slider_label1)
-        print('\n')
-        print(self.slider_label3)
-        
+
+    ## 访问一言api
     def yiyan(self):
         #一言
         api_url = 'https://v1.hitokoto.cn/?c=b&encode=json'
@@ -421,34 +387,147 @@ class MP3Player(QWidget):
         a_word = res['hitokoto']+' --'+'《'+res['from']+'》'
         self.textLable.setText(a_word)
 
-    def Equalizer(self):
+    ## 建议均衡器实现
+    def easy_Equalizer(self):
+        
         low_gain = int(self.slider_label1.text().split()[-1])
         mid_gain = int(self.slider_label2.text().split()[-1])
-        hig_gain = int(self.slider_label3.text().split()[-1])
+        hig_gain = int(self.slider_label3.text().split()[-1]) 
+
+        if int(self.slider_label1.text().split()[-1]) != 0 :
+            freq_range = [30,300]
+            gain = int(self.slider_label1.text().split()[-1])
+        if int(self.slider_label2.text().split()[-1]) != 0:
+            freq_range = [300,5000]
+            gain = int(self.slider_label2.text().split()[-1])
+        if  int(self.slider_label3.text().split()[-1]) != 0:
+            freq_range = [5000,20000]
+            gain = int(self.slider_label3.text().split()[-1])
+
+        input_file = format_path_string(self.cur_playing_song)
+        eq_output_file = eq(input_file, freq_range, gain, "./resource/media")
+
+    def widget3_create_form(self):
+
+        widget3_form_widget = QWidget()
+        widget3_form_layout = QVBoxLayout(widget3_form_widget)
+
+        widget3_sheet_layout = QGridLayout()
+
+        # 创建起始频率输入框和标签
+        start_freq_label = QLabel("起始频率(Hz):")
+        self.start_freq_input = QLineEdit()
+        widget3_sheet_layout.addWidget(start_freq_label, 0, 0)  # 第0行第0列
+        widget3_sheet_layout.addWidget(self.start_freq_input, 0, 1)  # 第0行第1列
+
+        
+
+        # 创建截止频率输入框和标签
+        stop_freq_label = QLabel("截止频率(Hz):")
+        self.stop_freq_input = QLineEdit()
+        widget3_sheet_layout.addWidget(stop_freq_label, 5, 0)  # 第1行第0列
+        widget3_sheet_layout.addWidget(self.stop_freq_input, 5, 1)  # 第1行第1列
+
+        # 创建增益倍数输入框和标签
+        gain_label = QLabel("增益倍数(dB):")
+        self.gain_input = QLineEdit()
+        widget3_sheet_layout.addWidget(gain_label, 3, 2)  # 第2行第0列
+        widget3_sheet_layout.addWidget(self.gain_input, 3, 3)  # 第2行第1列
+
+
+
+
+        # 创建提交按钮并放置在底部居中
+        btn_h_layout = QHBoxLayout()
+        hdeq_confirmBtn = QPushButton("确认调整")
+        btn_h_layout.addStretch()
+        btn_h_layout.addWidget(hdeq_confirmBtn)
+        btn_h_layout.addStretch()
+
+        hdeq_confirmBtn.clicked.connect(self.widget3_run)
+
+        widget3_form_layout.addLayout(widget3_sheet_layout)
+        widget3_form_layout.addLayout(btn_h_layout)
+
+        # 设置LineEdit的宽度
+        self.start_freq_input.setFixedWidth(400)
+        self.stop_freq_input.setFixedWidth(400)
+        self.gain_input.setFixedWidth(400)
+
+        return widget3_form_widget
+
+
+
+    def widget3_run(self):
+        try:
+            self.start_freq_value = float(self.start_freq_input.text())
+            self.stop_freq_value = float(self.stop_freq_input.text())
+            self.gain_value = float(self.gain_input.text())
+        except ValueError:
+            # 处理无效输入的错误情况
+            pass
 
         input_file = format_path_string(self.cur_playing_song)
         print(input_file)
-        freq_range = [1,400]
-        gain_factor = low_gain
+        freq_range = [self.start_freq_value,self.stop_freq_value]
+        gain_factor = self.gain_value
         eq_output_file = eq(input_file, freq_range, gain_factor, "./resource/media")
-        
-        # self.slider.setValue(0)
-        # self.musicList.setCurrentRow(self.musicList.currentRow())
-        # self.is_switching = True
-        # self.EQplayer.setMedia(QMediaContent(QUrl(eq_output_file)))
-        # self.player.pause() # 暂停播放
-        # self.is_pause = True
-        
-        
-        
-        # self.playMusic()
-        # self.is_switching = False
-        # self.is_eqing = True
-        # # print(type(self.cur_playing_song))
-        # # print(self.cur_playing_song)
-        # # print(type(self.cur_path))
-        # # print(self.cur_path)
 
+    def widget4_run(self):
+
+
+
+        self.offset_time_value_min = int(self.offset_time_input.text().split(":")[0])
+        
+        self.offset_time_value_sec = int(self.offset_time_input.text().split(":")[1])
+        self.offset_time_value = self.offset_time_value_min * 60 +self.offset_time_value_sec
+        print(self.offset_time_value)
+        self.duration_time_value = int(self.duration_time_input.text())
+
+
+        input_file = format_path_string(self.cur_playing_song)
+        plot_and_display_spectrogram(input_file,self.offset_time_value,self.duration_time_value)
+
+    def widget4_create_form(self):
+
+        widget4_form_widget = QWidget()
+        widget4_form_layout = QVBoxLayout(widget4_form_widget)
+
+        widget4_sheet_layout = QGridLayout()
+
+        # 创建起始频率输入框和标签
+        offset_time_label = QLabel("起始时间(分:秒):")
+        self.offset_time_input = QLineEdit()
+        widget4_sheet_layout.addWidget(offset_time_label, 0, 1)  # 第0行第0列
+        widget4_sheet_layout.addWidget(self.offset_time_input, 0, 2)  # 第0行第1列
+
+        
+
+        # 创建截止频率输入框和标签
+        duration_time_label = QLabel("持续时间(s):")
+        self.duration_time_input = QLineEdit()
+        widget4_sheet_layout.addWidget(duration_time_label, 3, 1)  # 第1行第0列
+        widget4_sheet_layout.addWidget(self.duration_time_input, 3, 2)  # 第1行第1列
+
+
+        # 创建提交按钮并放置在底部居中
+        widget4_btn_h_layout = QHBoxLayout()
+        confirm_specturm_Btn = QPushButton("确认生成")
+        widget4_btn_h_layout.addStretch()
+        widget4_btn_h_layout.addWidget(confirm_specturm_Btn)
+        widget4_btn_h_layout.addStretch()
+
+        confirm_specturm_Btn.clicked.connect(self.widget4_run)
+
+        widget4_form_layout.addLayout(widget4_sheet_layout)
+        widget4_form_layout.addLayout(widget4_btn_h_layout)
+
+        # 设置LineEdit的宽度
+        self.offset_time_input.setFixedWidth(400)
+        self.duration_time_input.setFixedWidth(400)
+        self.gain_input.setFixedWidth(400)
+
+        return widget4_form_widget
 
 
 
