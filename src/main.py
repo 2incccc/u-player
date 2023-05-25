@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (QWidget, QDesktopWidget,
                             QPushButton, QLabel, QFileDialog, QTabWidget, QApplication, QLineEdit, QGridLayout)
 from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtCore import Qt, QUrl, QTimer, QFileSystemWatcher
-from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent,QAudioFormat, QAudioOutput
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 
 from MyQLabel import MyQLabel
 
@@ -18,16 +18,18 @@ class MP3Player(QWidget):
         ## 继承父类
         super().__init__()
         
+        self.player = QMediaPlayer()
+        
+        
+        ## 时间标签
         self.startTimeLabel = QLabel('00:00')
         self.endTimeLabel = QLabel('00:00')
-
 
         self.musicList = QListWidget()
         self.song_formats = ['mp3', 'm4a', 'flac', 'wav', 'ogg']
         self.songs_list = []
         self.cur_playing_song = ''
         self.is_pause = True
-        self.player = QMediaPlayer()
         self.is_switching = False
         self.playMode = 0
 
@@ -386,10 +388,6 @@ class MP3Player(QWidget):
 
     ## 建议均衡器实现
     def easy_Equalizer(self):
-        
-        low_gain = int(self.slider_label1.text().split()[-1])
-        mid_gain = int(self.slider_label2.text().split()[-1])
-        hig_gain = int(self.slider_label3.text().split()[-1]) 
 
         if int(self.slider_label1.text().split()[-1]) != 0 :
             freq_range = [30,300]
@@ -403,6 +401,7 @@ class MP3Player(QWidget):
 
         input_file = format_path_string(self.cur_playing_song)
         eq_output_file = eq(input_file, freq_range, gain, "./resource/media")
+    
     ## Widget3建立表单
     def widget3_create_form(self):
 
@@ -448,7 +447,7 @@ class MP3Player(QWidget):
 
         return widget3_form_widget
 
-    ## widget3 运行
+    ## TODO widget3 高级滤波器运行
     def widget3_run(self):
         try:
             self.start_freq_value = float(self.start_freq_input.text())
@@ -463,19 +462,6 @@ class MP3Player(QWidget):
         freq_range = [self.start_freq_value,self.stop_freq_value]
         gain_factor = self.gain_value
         eq_output_file = eq(input_file, freq_range, gain_factor, "./resource/media")
-
-    ## widget4 
-    def widget4_run(self):
-
-        self.offset_time_value_min = int(self.offset_time_input.text().split(":")[0])
-        
-        self.offset_time_value_sec = int(self.offset_time_input.text().split(":")[1])
-        self.offset_time_value = self.offset_time_value_min * 60 +self.offset_time_value_sec
-        print(self.offset_time_value)
-        self.duration_time_value = int(self.duration_time_input.text())
-
-        input_file = format_path_string(self.cur_playing_song)
-        plot_and_display_spectrogram(input_file,self.offset_time_value,self.duration_time_value)
 
     def widget4_create_form(self):
 
@@ -514,6 +500,21 @@ class MP3Player(QWidget):
         self.gain_input.setFixedWidth(400)
 
         return widget4_form_widget
+    
+    ## TODO widget4 声谱图生成运行 
+    def widget4_run(self):
+
+        self.offset_time_value_min = int(self.offset_time_input.text().split(":")[0])
+        
+        self.offset_time_value_sec = int(self.offset_time_input.text().split(":")[1])
+        self.offset_time_value = self.offset_time_value_min * 60 +self.offset_time_value_sec
+        print(self.offset_time_value)
+        self.duration_time_value = int(self.duration_time_input.text())
+
+        input_file = format_path_string(self.cur_playing_song)
+        plot_and_display_spectrogram(input_file,self.offset_time_value,self.duration_time_value)
+
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
