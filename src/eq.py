@@ -3,6 +3,7 @@ import librosa
 import numpy as np
 import soundfile as sf
 
+## TODO 简单滤波算法
 def eq(input_file, freq_range, gain_factor, output_dir):
     # 加载音频文件
     y, sr = librosa.load(input_file)

@@ -165,7 +165,7 @@ class MP3Player(QWidget):
         self.PlayModeBtn.clicked.connect(self.playModeSet)
         self.eseq_confirmBtn.clicked.connect(self.easy_Equalizer)
 
-        ## 监测文件夹是否变化
+        ## TODO 监测文件夹是否变化
         self.file_watcher = QFileSystemWatcher(self)
         self.file_watcher.directoryChanged.connect(self.updateMusicList)
 
@@ -200,7 +200,7 @@ class MP3Player(QWidget):
             self.is_pause = True
             self.playBtn.setStyleSheet("QPushButton{border-image: url(resource/image/play.png)}")
 
-    # 显示音乐列表
+    ## TODO 显示音乐列表
     def showMusicList(self):
         self.musicList.clear()
         for song in os.listdir(self.cur_path):
@@ -211,7 +211,7 @@ class MP3Player(QWidget):
         if self.songs_list:
                 self.cur_playing_song = self.songs_list[self.musicList.currentRow()][-1]
 
-    # 更新音乐列表
+    ## TODO 更新音乐列表
     def updateMusicList(self):
         existing_songs = [item[0] for item in self.songs_list]
         new_songs = []
@@ -375,7 +375,7 @@ class MP3Player(QWidget):
 
         return slider_group,slider_label
 
-    ## 访问一言api
+    ## TODO 访问一言api
     def yiyan(self):
         #一言
         api_url = 'https://v1.hitokoto.cn/?c=b&encode=json'
