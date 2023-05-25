@@ -474,7 +474,6 @@ class MP3Player(QWidget):
         print(self.offset_time_value)
         self.duration_time_value = int(self.duration_time_input.text())
 
-
         input_file = format_path_string(self.cur_playing_song)
         plot_and_display_spectrogram(input_file,self.offset_time_value,self.duration_time_value)
 
@@ -491,14 +490,11 @@ class MP3Player(QWidget):
         widget4_sheet_layout.addWidget(offset_time_label, 0, 1)  # 第0行第0列
         widget4_sheet_layout.addWidget(self.offset_time_input, 0, 2)  # 第0行第1列
 
-        
-
         # 创建截止频率输入框和标签
         duration_time_label = QLabel("持续时间(s):")
         self.duration_time_input = QLineEdit()
         widget4_sheet_layout.addWidget(duration_time_label, 3, 1)  # 第1行第0列
         widget4_sheet_layout.addWidget(self.duration_time_input, 3, 2)  # 第1行第1列
-
 
         # 创建提交按钮并放置在底部居中
         widget4_btn_h_layout = QHBoxLayout()
