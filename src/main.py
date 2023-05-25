@@ -9,8 +9,8 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 
 from MyQLabel import MyQLabel
 
-from eq import eq
 from path_convert import format_path_string
+from eq import eq
 from spectrum_graph import plot_and_display_spectrogram
 
 class MP3Player(QWidget):
@@ -81,7 +81,7 @@ class MP3Player(QWidget):
 
         h_layout_btn = QHBoxLayout()
         self.eseq_confirmBtn = QPushButton("确认调整")
-        h_layout_btn.ddStretch()
+        h_layout_btn.addStretch()
         h_layout_btn . addWidget(self.eseq_confirmBtn)
         h_layout_btn.addStretch()
 
