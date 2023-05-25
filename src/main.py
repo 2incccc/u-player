@@ -31,7 +31,6 @@ class MP3Player(QWidget):
         self.is_switching = False
         self.playMode = 0
 
-
         ## 播放进度条
         self.slider = QSlider(Qt.Horizontal, self)
 
@@ -61,8 +60,6 @@ class MP3Player(QWidget):
         self.song_formats = ['mp3', 'm4a', 'flac', 'wav', 'ogg']
         self.songs_list = []
         self.cur_playing_song = ''
-
-
 
         layout1.addWidget(self.musicList)
 
@@ -406,7 +403,7 @@ class MP3Player(QWidget):
 
         input_file = format_path_string(self.cur_playing_song)
         eq_output_file = eq(input_file, freq_range, gain, "./resource/media")
-
+    ## Widget3建立表单
     def widget3_create_form(self):
 
         widget3_form_widget = QWidget()
@@ -420,8 +417,6 @@ class MP3Player(QWidget):
         widget3_sheet_layout.addWidget(start_freq_label, 0, 0)  # 第0行第0列
         widget3_sheet_layout.addWidget(self.start_freq_input, 0, 1)  # 第0行第1列
 
-        
-
         # 创建截止频率输入框和标签
         stop_freq_label = QLabel("截止频率(Hz):")
         self.stop_freq_input = QLineEdit()
@@ -433,9 +428,6 @@ class MP3Player(QWidget):
         self.gain_input = QLineEdit()
         widget3_sheet_layout.addWidget(gain_label, 3, 2)  # 第2行第0列
         widget3_sheet_layout.addWidget(self.gain_input, 3, 3)  # 第2行第1列
-
-
-
 
         # 创建提交按钮并放置在底部居中
         btn_h_layout = QHBoxLayout()
@@ -456,8 +448,7 @@ class MP3Player(QWidget):
 
         return widget3_form_widget
 
-
-
+    ## widget3 运行
     def widget3_run(self):
         try:
             self.start_freq_value = float(self.start_freq_input.text())
@@ -473,6 +464,7 @@ class MP3Player(QWidget):
         gain_factor = self.gain_value
         eq_output_file = eq(input_file, freq_range, gain_factor, "./resource/media")
 
+    ## widget4 
     def widget4_run(self):
 
         self.offset_time_value_min = int(self.offset_time_input.text().split(":")[0])
@@ -526,9 +518,6 @@ class MP3Player(QWidget):
         self.gain_input.setFixedWidth(400)
 
         return widget4_form_widget
-
-
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
