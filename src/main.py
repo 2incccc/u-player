@@ -82,7 +82,7 @@ class MP3Player(QWidget):
 
         h_layout_btn = QHBoxLayout()
         self.eseq_confirmBtn = QPushButton("确认调整")
-        h_layout_btn.addStretch()
+        h_layout_btn.ddStretch()
         h_layout_btn . addWidget(self.eseq_confirmBtn)
         h_layout_btn.addStretch()
 
@@ -114,11 +114,11 @@ class MP3Player(QWidget):
         self.nextBtn.setFixedSize(60, 60)
         self.prevBtn.setStyleSheet("QPushButton{border-image: url(./resource/image/46第一页、首页、上一首.png)}")
         self.prevBtn.setFixedSize(60, 60)
-        self.openBtn.setStyleSheet("QPushButton{border-image: url(./resource/image/下载.png)}")
+        self.openBtn.setStyleSheet("QPushButton{border-image: url(./resource/image/打开文件夹.png)}")
         self.openBtn.setFixedSize(50, 50)
         self.PlayModeBtn.setStyleSheet("QPushButton{border-image: url(./resource/image/顺序播放.png)}")
         self.PlayModeBtn.setFixedSize(50, 50)
-        
+
         ## 计时器Timer
         self.timer = QTimer(self)
         self.timer.start(1000)
@@ -474,8 +474,6 @@ class MP3Player(QWidget):
         eq_output_file = eq(input_file, freq_range, gain_factor, "./resource/media")
 
     def widget4_run(self):
-
-
 
         self.offset_time_value_min = int(self.offset_time_input.text().split(":")[0])
         

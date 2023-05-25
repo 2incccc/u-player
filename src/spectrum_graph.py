@@ -23,7 +23,7 @@ def plot_and_display_spectrogram(audio_path, offset, duration):
 
     # 生成输出路径
     audio_name = os.path.splitext(os.path.basename(audio_path))[0]
-    output_path = f'./resource/spectrogram/{audio_name}.png'
+    output_path = f'./resource/spectrogram/{audio_name}_{offset}_{duration}.png'
 
     # 保存声谱图为静态图像
     plt.savefig(output_path, bbox_inches='tight', dpi=300)
