@@ -165,7 +165,7 @@ class MP3Player(QWidget):
         self.musicList.itemDoubleClicked.connect(self.doubleClicked)
         self.slider.sliderMoved[int].connect(lambda: self.player.setPosition(self.slider.value()))
         self.PlayModeBtn.clicked.connect(self.playModeSet)
-        self.eseq_confirmBtn.clicked.connect(self.easy_Equalizer)
+        self.eseq_confirmBtn.clicked.connect(self.widget2_run)
 
         ## TODO 监测文件夹是否变化
         self.file_watcher = QFileSystemWatcher(self)
@@ -189,7 +189,7 @@ class MP3Player(QWidget):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
-    # 打开文件夹
+    # TODO 打开文件夹
     def openMusicFloder(self):
         self.cur_path = QFileDialog.getExistingDirectory(self, "选取音乐文件夹", './')
         if self.cur_path:
@@ -377,7 +377,6 @@ class MP3Player(QWidget):
 
         return slider_group,slider_label
 
-    ## TODO 访问一言api
     def yiyan(self):
         #一言
         api_url = 'https://v1.hitokoto.cn/?c=b&encode=json'
@@ -386,8 +385,8 @@ class MP3Player(QWidget):
         a_word = res['hitokoto']+' --'+'《'+res['from']+'》'
         self.textLable.setText(a_word)
 
-    ## 建议均衡器实现
-    def easy_Equalizer(self):
+    ## TODO Widget2 简易均衡器运行
+    def widget2_run(self):
 
         if int(self.slider_label1.text().split()[-1]) != 0 :
             freq_range = [30,300]
